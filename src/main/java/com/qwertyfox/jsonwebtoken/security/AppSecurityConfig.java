@@ -1,5 +1,6 @@
 package com.qwertyfox.jsonwebtoken.security;
 
+import com.qwertyfox.jsonwebtoken.jwt.MyTokenVerifier;
 import com.qwertyfox.jsonwebtoken.jwt.MyUsernamePasswordAuthFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -37,6 +38,10 @@ public class AppSecurityConfig extends WebSecurityConfigurerAdapter {
         return provider;
     }
 
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.authenticationProvider(myAuthenticationProvider());
+    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -46,8 +51,9 @@ public class AppSecurityConfig extends WebSecurityConfigurerAdapter {
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                     .and()
                 .addFilter(new MyUsernamePasswordAuthFilter(authenticationManager()))
+                .addFilterAfter(new MyTokenVerifier(), MyUsernamePasswordAuthFilter.class)
                 .authorizeRequests()
-                    .antMatchers("/","/css/*","/js/*","/login").permitAll()
+                    .antMatchers("/","/css/*","/js/*").permitAll()
                 .anyRequest()
                 .authenticated();
     }
