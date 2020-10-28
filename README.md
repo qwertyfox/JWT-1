@@ -21,14 +21,10 @@ The token has a secret key and the expiry of token is set to 2 weeks. Each time 
 
 ## Testing conditions in Postman <br />
 1. URL: localhost:8080/login  Method: POST
-2. Request Body type: raw --->JSON 
+2. Request Body type: raw --->JSON <br />
   Content 
-
-{
-    "username" : "Peter",
-    "password" : "peter123"
-}<br />
-// or any username and password defined in the database
+{"username" : "Peter","password" : "peter123"}
+// or any username and password defined in the database 
 3. From the response Headers, "Authorization" header's content is copied. It must have prefix "Barer "
 4. URL: localhost:8080/test Method: GET
 5. A new header with name "Authorization" in Request Headers is created and content is pasted, with "Barer " prefix
