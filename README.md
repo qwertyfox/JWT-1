@@ -2,7 +2,7 @@
 Using Spring Security with JWT and SQLite3 Database.<br />
 The project uses Json codes containig username and password instead of GUI. 
 MyUsernamePasswordAuthFilter checks the username and password with the Db record and also sends a Json Web Token (JWT) to client.
-The token has a secret key and the expiry of token is set to 2 weeks. Each time client sents request to access secured content url "/test", the token is authenticated each time.
+The token has a secret key and the expiry of token is set to 2 weeks. Each time client sents request to access secured content url "/test", the token is authenticated each time by MyTokenVerifier 
 
 ## General:
 1. Application maps the username and password using ObjectMapper to authenticate it with the Db record.
