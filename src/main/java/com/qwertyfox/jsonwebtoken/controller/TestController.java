@@ -14,7 +14,6 @@ public class TestController {
 
     @GetMapping
     public String getTestUrl() {
-        System.out.println("Get mapping was called.");
         return "Test passed";
     }
 

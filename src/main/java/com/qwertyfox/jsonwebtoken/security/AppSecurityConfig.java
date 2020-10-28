@@ -16,6 +16,8 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import javax.crypto.SecretKey;
+
 
 @Configuration
 @EnableWebSecurity
@@ -23,11 +25,19 @@ public class AppSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final PasswordEncoder passwordEncoder;
     private final UserDetailsService userDetailsService;
+    private final SecretKey secretKey;
+    private final JwtConfig jwtConfig;
 
     @Autowired
-    public AppSecurityConfig(PasswordEncoder passwordEncoder, @Qualifier("myUDS") UserDetailsService userDetailsService) {
+    public AppSecurityConfig(PasswordEncoder passwordEncoder,
+                             @Qualifier("myUDS") UserDetailsService userDetailsService,
+                             SecretKey secretKey,
+                             JwtConfig jwtConfig) {
+
         this.passwordEncoder = passwordEncoder;
         this.userDetailsService = userDetailsService;
+        this.secretKey = secretKey;
+        this.jwtConfig = jwtConfig;
     }
 
     @Bean
@@ -50,8 +60,8 @@ public class AppSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement()
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                     .and()
-                .addFilter(new MyUsernamePasswordAuthFilter(authenticationManager()))
-                .addFilterAfter(new MyTokenVerifier(), MyUsernamePasswordAuthFilter.class)
+                .addFilter(new MyUsernamePasswordAuthFilter(authenticationManager(), jwtConfig, secretKey))
+                .addFilterAfter(new MyTokenVerifier(jwtConfig, secretKey), MyUsernamePasswordAuthFilter.class)
                 .authorizeRequests()
                     .antMatchers("/","/css/*","/js/*").permitAll()
                 .anyRequest()

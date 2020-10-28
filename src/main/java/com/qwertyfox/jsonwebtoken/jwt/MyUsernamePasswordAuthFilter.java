@@ -1,6 +1,7 @@
 package com.qwertyfox.jsonwebtoken.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.qwertyfox.jsonwebtoken.security.JwtConfig;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -9,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import javax.crypto.SecretKey;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -20,9 +22,15 @@ public class MyUsernamePasswordAuthFilter extends UsernamePasswordAuthentication
 
 
     private final AuthenticationManager authenticationManager;
+    private final JwtConfig jwtConfig;
+    private final SecretKey secretKey;
 
-    public MyUsernamePasswordAuthFilter(AuthenticationManager authenticationManager) {
+    public MyUsernamePasswordAuthFilter(AuthenticationManager authenticationManager,
+                                        JwtConfig jwtConfig,
+                                        SecretKey secretKey) {
         this.authenticationManager = authenticationManager;
+        this.jwtConfig = jwtConfig;
+        this.secretKey = secretKey;
     }
 
 
@@ -58,18 +66,16 @@ public class MyUsernamePasswordAuthFilter extends UsernamePasswordAuthentication
                                             FilterChain chain,
                                             Authentication authResult) throws IOException, ServletException {
 
-        String securedKey = "This_Need_To_Be_Very_Secured_Key";
-
         // Following code creates the JWT
         String token = Jwts.builder()
                 .setSubject(authResult.getName()) // Username
                 .claim("authorities", authResult.getAuthorities())
                 .setIssuedAt(new java.util.Date())
-                .setExpiration(java.sql.Date.valueOf(LocalDate.now().plusWeeks(2)))
-                .signWith(Keys.hmacShaKeyFor(securedKey.getBytes()))
+                .setExpiration(java.sql.Date.valueOf(LocalDate.now().plusWeeks(jwtConfig.getTokenExpiresAfterWeeks())))
+                .signWith(secretKey)
                 .compact(); // Packages into a single line
 
-        response.addHeader("Authorization","Barer " +token); // needs to be in this order
+        response.addHeader(jwtConfig.getAuthorizationHeader(),jwtConfig.getTokenPrefix() +token); // needs to be in this order
 
 
     }
